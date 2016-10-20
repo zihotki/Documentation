@@ -223,6 +223,38 @@ Here's an example of a filter that uses service location with the Web API ``IDep
         service.DoWork();
       }
     }
+    
+Also Factories can be used to instantiate a service at runtime.
+
+.. sourcecode:: csharp
+
+    public interface ServiceCallActionFilterAttribute : ActionFilterAttribute
+    {
+      private readonly Func<IMyService> _myServiceFactory;
+      
+      public ServiceCallActionFilterAttribute(Func<IMyService> myServiceFactory)
+      {
+        _myServiceFactory = myServiceFactory;
+      }
+      
+      public override void OnActionExecuting(HttpActionContext actionContext)
+      {
+        // Resolve the service you want to use.
+        var service = _myServiceFactory();
+
+        // Do the rest of the work in the filter.
+        service.DoWork();
+      }
+    }
+And the filter should be registered like this.
+
+.. sourcecode:: csharp
+
+    public static void RegisterGlobalFilters(GlobalFilterCollection filters, IContainer container)
+    {
+      filters.Add(container.Resolve<ServiceCallActionFilterAttribute>());
+    }
+
 
 Per-Controller-Type Services
 ============================
